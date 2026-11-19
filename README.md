@@ -2,7 +2,7 @@
 
 **Project:** Digital Guest Experience Platform (Sprint Group 4)  
 **Project Stage:** Pre-build security requirements, risk identification, and architecture guidance *(excludes live penetration testing prior to MVP build)*  
-**Status:** Deliverables 1 & 2 Complete | Deliverables 3–5 In Progress
+**Status:** Complete (All 5 Deliverables Merged)
 
 ## Team Members & Assigned Roles
 
@@ -10,8 +10,8 @@
 | :--- | :--- | :--- |
 | **Muhyideen Husseini (`@MOH_Sec`)** *(Coordinator)* | Deliverable 1 & Master Report Compilation | Platform Security Risk Assessment & Cross-Team Alignment |
 | **Oyetoro Oyeleke Joseph** | Deliverable 2 | Authentication & Access Control Specification |
-| **Obasi Anselem** & **Muhammad Salihu Fatima Binta** | Deliverable 3 | Guest Data Protection & Nigeria NDPA 2023 Checklist *(In Progress)* |
-| **Patience Ishigbuzo**, **Hamed Ololade** & **Godwin Adewuyi** | Deliverable 4 & Deliverable 5 | Paystack Payment Security & Developer Security Testing Checklist *(In Progress)* |
+| **Obasi Anselem** & **Muhammad Salihu Fatima Binta** | Deliverable 3 | Guest Data Protection & Nigeria NDPA 2023 Checklist |
+| **Patience Ishigbuzo**, **Hamed Ololade** & **Godwin Adewuyi** | Deliverable 4 & Deliverable 5 | Paystack Payment Security & Developer Security Testing Checklist |
 
 ---
 
@@ -21,8 +21,8 @@ Identify the Digital Guest Experience Platform's major architectural, operationa
 ## Part 2: Activities Completed
 * Reviewed the Product Requirements Document (PRD) across all 12 functional modules and non-functional requirements (multi-tenancy, 99.5% uptime, Paystack integration, pre-arrival ID verification, digital room access, and NDPA 2023 compliance).
 * Allocated the 5 Cybersecurity sprint deliverables across sub-team members and aligned with Product Management, Backend, and Frontend leads.
-* Completed **Deliverable 1 (Basic Security Risk Assessment)** and **Deliverable 2 (Authentication & Access Control Specification)**.
-* *In Progress:* Guest Data Protection (NDPA 2023), Paystack Payment Security, and Developer Security Testing Checklists.
+* Completed **Deliverable 1 (Basic Security Risk Assessment)**, **Deliverable 2 (Authentication & Access Control Specification)**, and **Deliverable 3 (Guest Data Protection & Nigeria NDPA 2023 Checklist)**.
+* Completed **Deliverable 4 (Payment Security Recommendations — Paystack Integration)** and **Deliverable 5 (Developer Security Testing Checklist)**.
 
 ---
 
@@ -96,19 +96,77 @@ Identify the Digital Guest Experience Platform's major architectural, operationa
 ---
 
 ### Deliverable 3: Guest Data Protection & Nigeria NDPA 2023 Checklist
-> *In Progress — Obasi Anselem & Muhammad Salihu Fatima Binta (Encrypted ID/signature storage & auto-deletion, lawful consent, privacy notice, AI personalisation opt-out, and NDPA 2023 data subject access/deletion rights).*
+**Scope:** Privacy, consent, identity document protection, data lifecycle, and regulatory compliance controls under the Nigeria Data Protection Act (NDPA) 2023.
+
+#### 3.1 Guest Data Protection & Privacy Controls
+* **Zero Raw Card Data Storage:** Never accept, store, or process raw payment card numbers internally; delegate all card handling to PCI-DSS compliant Paystack checkout and store only transaction references.
+* **Lawful Consent & Transparency:** Present a clear privacy notice at registration explaining what guest data is collected, why it is processed, and retention periods; capture explicit, timestamped opt-in consent.
+* **AI Personalisation & Marketing Opt-Out:** Provide simple in-app controls allowing guests to opt out of AI-driven stay recommendations and promotional SMS/email notifications at any time without degrading core booking or check-in functionality.
+* **Data Integrity & Least-Privilege Access:** Validate guest profile fields server-side, restrict ID/signature viewing strictly to authorized Front Desk and Manager roles (`hotel_id` scoped), and disable unnecessary file downloads.
+* **Data Subject Rights (Access, Correction & Deletion):** Provide workflows for guests to view, export, update, or request deletion of their personal profile and historical stay records (subject to statutory hotel/tax record-keeping rules).
+
+#### 3.2 Specific NDPA 2023 Requirements for Guest ID Documents
+
+| NDPA 2023 Requirement Area | Platform Implementation Mandate |
+| :--- | :--- |
+| **Lawful Basis & Sensitive Data** | Rely on a valid legal basis (statutory hotel/KYC compliance or explicit consent) and apply heightened encryption and access protections to government IDs, NINs, and digital signatures. |
+| **Data Minimization & Retention** | Collect only the minimum ID fields required for check-in; enforce automated deletion or secure purging of uploaded ID images and signatures on a strict post-checkout schedule. |
+| **Data Protection Impact Assessment (DPIA)** | Conduct and document a formal DPIA prior to onboarding hotels at scale for systematic ID document collection or automated identity verification. |
+| **Technical & Organizational Safeguards** | Encrypt ID files and signatures at rest (AES-256) and in transit (TLS 1.2+), store in private cloud buckets served via short-lived signed URLs, and log every staff view event. |
+| **72-Hour Breach Notification** | Maintain an incident response playbook to report any unauthorized ID or PII breach to the Nigeria Data Protection Commission (NDPC) within 72 hours and notify affected guests where high risk exists. |
+| **Third-Party & Cross-Border Rules** | Execute binding Data Processing Agreements (DPAs) with cloud hosting, SMS/email, and KYC vendors, and ensure approved cross-border transfer safeguards if data is hosted outside Nigeria. |
+| **Major Importance Thresholds** | Track guest volume across onboarded hotels to register as a Data Controller/Processor of Major Importance with NDPC, appoint a Data Protection Officer (DPO), and file annual Compliance Audit Returns (CAR) where applicable. |
+
+#### 3.3 Operational Best Practices to Reduce Identity Risk
+* **Verify Without Long-Term Storage:** Where feasible, integrate NIMC-licensed verification APIs to confirm guest identity via pass/fail tokens rather than retaining raw ID card photos or PDFs.
+* **Ban Insecure Collection Channels:** Strictly prohibit collecting or sharing guest IDs over personal WhatsApp chats, unencrypted email threads, or shared public folders.
+* **Field Masking & Redaction:** Mask non-essential sensitive digits (e.g., partial NIN/passport numbers) in standard staff views when full visibility is not legally required.
+* **Front-Desk Privacy Training:** Mandate onboarding and periodic NDPA 2023 data-handling training for hotel receptionists and managers, with documented completion logs.
+
+---
 
 ### Deliverable 4: Payment Security Recommendations (Paystack Integration)
-> *In Progress — Patience Ishigbuzo, Hamed Ololade & Godwin Adewuyi (Server-side transaction initialization, Paystack HMAC-SHA512 webhook verification, idempotency keys, refund/dispute controls, and zero raw card storage).*
+**Scope:** Payment lifecycle integrity, Paystack webhook verification, idempotency, reconciliation, and refund authorization controls for room bookings and concierge orders.
+
+#### 4.1 Core Paystack Security & Integrity Controls
+* **Server-Side Transaction Initialization & Verification:** Initialize Paystack transactions exclusively from the backend using server-validated room/service prices (never trust client-submitted amounts). Never treat a frontend callback alone as conclusive proof of payment; verify transaction status server-side via Paystack's verification API before confirming any booking.
+* **Webhook Signature Authentication (HMAC-SHA512):** Validate Paystack's `x-paystack-signature` header using HMAC-SHA512 against the raw request payload and secret key on every incoming webhook event; reject unsigned or invalid requests immediately.
+* **Strict Idempotency & Duplicate Prevention:** Assign a unique idempotency key and transaction reference to every payment initiation and webhook event so double-clicks, page refreshes, network retries, or repeated Paystack webhook deliveries never trigger duplicate bookings or double debits.
+* **Zero Raw Card Data Storage (PCI-DSS Scope Reduction):** Delegate all card entry and processing to Paystack's hosted/PCI-DSS compliant checkout; store only Paystack transaction references, payment status, timestamps, and hotel/booking metadata.
+* **Controlled Refunds & Separation of Duties:** Require dual authorization / manager-level approval for booking refunds or reversals (the staff member initiating a refund cannot self-approve it). Block duplicate refunds or refunds exceeding the original paid amount, and link every reversal to its original ledger entry.
+* **Traceable Audit Trail & Reconciliation:** Maintain append-only financial transaction records (no silent editing or deletion of posted entries) and run automated daily reconciliation between internal booking payment logs and Paystack settlement reports.
+
+---
 
 ### Deliverable 5: Developer Security Testing Checklist
-> *In Progress — Patience Ishigbuzo, Hamed Ololade & Godwin Adewuyi (Pre-launch SAST/dependency scanning, API rate-limiting, IDOR/tenant isolation tests, session/MFA verification, and Paystack webhook testing).*
+**Scope:** Pre-launch functional security, authentication, API isolation, payment integrity, and negative edge-case verification across Development, Staging, and UAT environments *(excludes formal third-party penetration testing prior to MVP build)*.
+
+#### 5.1 Pre-Launch Security & Payment Verification Matrix
+
+| Test ID | Domain | Test Scenario | Expected Outcome |
+| :--- | :--- | :--- | :--- |
+| **TST-01** | Auth & Sessions | Submit weak passwords, repeated invalid logins, or expired/reused OTPs and password reset tokens. | Weak passwords rejected; progressive throttling blocks brute force without account enumeration; expired/reused tokens invalidated and prior sessions revoked. |
+| **TST-02** | RBAC & Tenant Isolation | Attempt to access Property B records using Property A staff credentials, or call admin/housekeeping endpoints as a Guest/Concierge. | Backend enforces default-deny `hotel_id` scoping and role boundaries; all cross-tenant and unauthorized role requests return `403 Forbidden`. |
+| **TST-03** | Object Ownership (IDOR) | Authenticated as Guest A, request or modify Guest B's booking ID, concierge request, or uploaded ID signed URL. | Backend rejects unauthorized object access (`403`/`404`) and blocks expired or tampered signed URLs. |
+| **TST-04** | Digital Room Keys | Attempt to issue a digital key for an unpaid/cancelled stay, or use a key after checkout or manual staff revocation. | Key issuance blocked for ineligible stays; active keys expire automatically at checkout and revoke immediately on command. |
+| **TST-05** | Input & API Hardening | Submit SQL injection, XSS payloads, oversized payloads, or unauthenticated state-changing requests without CSRF/TLS. | Malicious inputs sanitized/rejected; HTTPS enforced; CSRF protection blocks forged browser requests; minimal error details returned. |
+| **TST-06** | Paystack Webhook Integrity | Send forged webhook signatures, out-of-sequence events, or replay the same successful Paystack webhook 5 times. | Forged signatures rejected; duplicate webhook replays ignored via idempotency keys (only one booking confirmation posted). |
+| **TST-07** | Payment Edge Cases & Dubious Debits | Simulate rapid double-clicks on "Pay", zero/negative amounts, network timeout after bank debit, and duplicate refund requests. | Zero/negative amounts rejected; idempotency blocks double charges; timeout triggers server-side Paystack status enquiry; duplicate/over-limit refunds blocked. |
+| **TST-08** | Audit Logs & Backups | Trigger role changes, ID views, key revocations, and failed logins; inspect application logs and test encrypted database backup restoration. | Immutable audit records capture actor, `hotel_id`, and UTC timestamp with zero raw passwords, tokens, or card secrets; backup restores cleanly. |
+
+#### 5.2 Defect Severity & Go-Live Release Gate
+
+| Severity | Definition | Release Gate Policy |
+| :--- | :--- | :--- |
+| **Critical** | Financial loss, duplicate debits, cross-hotel data breach, unauthorized room access, or broken webhook verification. | Mandatory blocker — must be resolved and retested before pilot or production launch. |
+| **High** | Major failure in RBAC, MFA enforcement, ID document encryption/retention, or audit logging. | Mandatory blocker — must be resolved before launch. |
+| **Medium / Low** | Minor validation, rate-limit tuning, or UI error-message improvements with an approved workaround. | Requires documented PM/Security sign-off and scheduled fix window. |
 
 ---
 
 ## Part 4: Tools & Frameworks Used
 * **Collaboration & Documentation:** Google Docs, GitHub, WhatsApp, Slack
-* **Standards & Frameworks:** OWASP ASVS, OWASP Cheat Sheet Series (Auth, Authorization, Session Management, Password Storage, MFA), Qualitative Risk Modelling, Nigeria Data Protection Act (NDPA) 2023
+* **Standards & Frameworks:** OWASP ASVS, OWASP Cheat Sheet Series (Auth, Authorization, Session Management, Password Storage, MFA), Qualitative Risk Modeling, Nigeria Data Protection Act (NDPA) 2023
 
 ## Part 5: Challenges Encountered
 * Defining concrete API, database, and lock-vendor controls prior to finalized Backend schemas required documenting explicit assumptions for developer confirmation.
@@ -119,3 +177,8 @@ Identify the Digital Guest Experience Platform's major architectural, operationa
 2. Enforce MFA for all staff/admin accounts and prohibit shared front-desk logins.
 3. Verify all Paystack payment status changes via HMAC-SHA512 signed webhooks with idempotency keys.
 4. Store guest IDs in encrypted private storage using short-lived signed URLs with automated post-stay deletion per NDPA 2023.
+
+## Next Steps
+1. Hand over this finalized 5-deliverable Cybersecurity Sprint Report to the Product Manager, Backend Lead, and Frontend Lead for Day 3 review and architecture alignment.
+2. Review Backend's database ER diagram, API endpoint specs, and Paystack webhook handler implementation against Deliverables 1–4.
+3. Confirm operational parameters with the PM (primary login identifier, session timeout durations, lock-vendor revocation API, and post-checkout ID retention window) and execute Deliverable 5 test cases (`TST-01` to `TST-08`) in Staging prior to pilot launch.
