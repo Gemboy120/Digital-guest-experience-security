@@ -11,7 +11,7 @@
 | **Muhyideen Husseini (`@MOH_Sec`)** *(Coordinator)* | Deliverable 1 & Master Report Compilation | Platform Security Risk Assessment & Cross-Team Alignment |
 | **Oyetoro Oyeleke Joseph** | Deliverable 2 | Authentication & Access Control Specification |
 | **Obasi Anselem** & **Muhammad Salihu Fatima Binta** | Deliverable 3 | Guest Data Protection & Nigeria NDPA 2023 Checklist |
-| **Patience Ishigbuzo**, **Hamed Ololade** & **Godwin Adewuyi** | Deliverable 4 & Deliverable 5 | Paystack Payment Security & Developer Security Testing Checklist |
+| **Patience Ishigbuzo** | Deliverable 4 & Deliverable 5 | Paystack Payment Security & Developer Security Testing Checklist |
 
 ---
 
@@ -179,6 +179,5 @@ Identify the Digital Guest Experience Platform's major architectural, operationa
 4. Store guest IDs in encrypted private storage using short-lived signed URLs with automated post-stay deletion per NDPA 2023.
 
 ## Next Steps
-1. Hand over this finalized 5-deliverable Cybersecurity Sprint Report to the Product Manager, Backend Lead, and Frontend Lead for Day 3 review and architecture alignment.
-2. Review Backend's database ER diagram, API endpoint specs, and Paystack webhook handler implementation against Deliverables 1–4.
-3. Confirm operational parameters with the PM (primary login identifier, session timeout durations, lock-vendor revocation API, and post-checkout ID retention window) and execute Deliverable 5 test cases (`TST-01` to `TST-08`) in Staging prior to pilot launch.
+1. Review Backend's database ER diagram, API endpoint specs, and Paystack webhook handler implementation against Deliverables 1–4.
+2. Confirm operational parameters with the PM (primary login identifier, session timeout durations, lock-vendor revocation API, and post-checkout ID retention window) and execute Deliverable 5 test cases (`TST-01` to `TST-08`) in Staging prior to pilot launch.
